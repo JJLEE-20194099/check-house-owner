@@ -35,14 +35,18 @@ def check_house_owner(body: HouseOwnerCheckModel):
 
     text = preprocess_text(data['description'])
     if check_owner_by_naive_method(text) == 0:
-        return 0
+        return {
+            "is_owner": 0
+        }
 
 
     emoji_count, word_count = split_count(text)
     print("emoji_count:", emoji_count)
 
     if emoji_count >= 2:
-        return 0
+        return {
+            "is_owner": 0
+        }
 
     fine = ''
     for c in list(text):
@@ -67,6 +71,10 @@ def check_house_owner(body: HouseOwnerCheckModel):
 
     print(sum)
     if sum > 10:
-        return 0
+        return {
+            "is_owner": 0
+        }
 
-    return 1
+    return {
+            "is_owner": 1
+        }
