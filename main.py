@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Depends
-from typing import Union
+from fastapi import FastAPI
 from pydantic import BaseModel
 from utils import get_specific_phrase, preprocess_text, check_owner_by_naive_method, split_count
 from pyvi import ViTokenizer, ViPosTagger
+from constant import Threshold
+
 import pandas as pd
-import numpy as np
 
 app = FastAPI(
     title='FastAPI House Owner Checking', docs_url='/docs',
@@ -34,8 +34,16 @@ specific_phrases = get_specific_phrase()
 def check_house_owner(body: HouseOwnerCheckModel):
 
     data = dict(body)
-
     text = preprocess_text(data['description'])
+
+
+    word_count = len(text.split(" "))
+    if word_count < Threshold.WORD_COUNT_THRESHOLD:
+        return {
+            "is_owner": 1
+        }
+
+
     if check_owner_by_naive_method(text) == 0:
         return {
             "is_owner": 0
@@ -45,7 +53,7 @@ def check_house_owner(body: HouseOwnerCheckModel):
     emoji_count, word_count = split_count(text)
     print("emoji_count:", emoji_count)
 
-    if emoji_count >= 2:
+    if emoji_count >= Threshold.EMOJI_COUNT_THRESHOLD:
         return {
             "is_owner": 0
         }
@@ -75,7 +83,7 @@ def check_house_owner(body: HouseOwnerCheckModel):
                 sum += 1
                 print(item)
                 break
-    if sum >= 2:
+    if sum >= Threshold.SPECIFIC_PHRASE_COUNT_THRESHOLD:
         return {
             "is_owner": 0
         }
@@ -89,7 +97,7 @@ def check_house_owner(body: HouseOwnerCheckModel):
                 break
 
     print(sum)
-    if sum > 10:
+    if sum > Threshold.VIVID_TAG_COUNT_THRESHOLD:
         return {
             "is_owner": 0
         }
