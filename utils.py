@@ -161,3 +161,9 @@ def split_count(text):
 
     words_counter = len(text.split())
     return emoji_counter, words_counter
+
+def get_specific_phrase():
+    f = open("./data/specific_phrase.txt", "r", encoding="utf8")
+    phrases = f.readlines()
+    phrases = [preprocess_text(text.strip()) for text in phrases]
+    return phrases
