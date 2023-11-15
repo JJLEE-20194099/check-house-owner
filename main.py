@@ -27,8 +27,7 @@ class HouseOwnerCheckModel(BaseModel):
 
 
 tag_df = pd.read_csv('./data/selected_neg_tag.csv')
-based_tags = tag_df['phrase'].tolist()
-
+based_tags = list(set(tag_df['phrase'].tolist()))
 @app.post("//house-owner-checking")
 def check_house_owner(body: HouseOwnerCheckModel):
 
@@ -42,7 +41,7 @@ def check_house_owner(body: HouseOwnerCheckModel):
     emoji_count, word_count = split_count(text)
     print("emoji_count:", emoji_count)
 
-    if emoji_count >= 3:
+    if emoji_count >= 2:
         return 0
 
     fine = ''
@@ -55,14 +54,19 @@ def check_house_owner(body: HouseOwnerCheckModel):
     tag_df = pd.DataFrame(columns = ['phrase', 'tag'])
     tag_df['phrase'] = tag[0]
     tag_df['tag'] = tag[1]
-    tag_df = tag_df[tag_df['tag'] == 'A']
+    tag_df = tag_df[tag_df['phrase'].str.contains('_')]
 
-    selected_tags = tag_df['phrase'].tolist()
-    cnt_arr = np.array([tag in based_tags for tag in selected_tags])
-    sum = np.sum(cnt_arr)
+    selected_tags = list(set(tag_df['phrase'].tolist()))
+    sum = 0
+    for item in selected_tags:
+        for based_tag in based_tags:
+            if item in based_tag:
+                sum += 1
+                print(item)
+                break
 
+    print(sum)
     if sum > 10:
         return 0
-    print(sum)
 
     return 1
